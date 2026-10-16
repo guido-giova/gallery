@@ -33,6 +33,6 @@ This is a table of the environment variables that the application uses.
 
 |    Name     | Description                                  | Default |
 |:-----------:|----------------------------------------------|:-------:|
-|    PORT     | Determines the port of the applicaiton       |  8080   |
+|    PORT     | Determines the port of the application       |  8080   |
 | DB_USERNAME | The user that can interact with the database |         |
 | DB_PASSWORD | The password of the user                     |         |
