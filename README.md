@@ -36,3 +36,26 @@ This is a table of the environment variables that the application uses.
 |    PORT     | Determines the port of the application       |  8080   |
 | DB_USERNAME | The user that can interact with the database |         |
 | DB_PASSWORD | The password of the user                     |         |
+
+## Instructions
+
+### Run the Application
+
+Make sure you have Java 25 installed.
+
+Run the Spring Boot application using the Maven wrapper:
+
+```bash
+./mvnw spring-boot:run -e
+```
+
+On Windows, use:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+The application will be available at [http://localhost:8080](http://localhost:8080) by default.
+You can change the port by setting the `PORT` environment variable.
+
+Make sure `DB_USERNAME` and `DB_PASSWORD` are configured if your database requires credentials.
