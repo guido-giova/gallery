@@ -21,4 +21,20 @@ public final class ItemMapper {
                 resultSet.getBoolean("is_favorite")
         );
     }
+
+    public static Item copyWithId(Item item, long id) {
+        return new Item(
+                id,
+                item.hash(),
+                item.storagePath(),
+                item.mime(),
+                item.sizeBytes(),
+                item.width(),
+                item.height(),
+                item.durationMs(),
+                item.title(),
+                item.description(),
+                item.isFavorite()
+        );
+    }
 }
