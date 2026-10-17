@@ -36,3 +36,14 @@ This is a table of the environment variables that the application uses.
 |    PORT     | Determines the port of the applicaiton       |  8080   |
 | DB_USERNAME | The user that can interact with the database |         |
 | DB_PASSWORD | The password of the user                     |         |
+
+## Tests
+
+The repository integration tests start a temporary PostgreSQL database in Docker and run the Flyway migrations against
+it. Start Docker Desktop, then run:
+
+```powershell
+.\mvnw.cmd test
+```
+
+The tests use their own temporary database and do not modify your configured gallery database.
