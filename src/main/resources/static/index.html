@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Local Media Gallery</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+<main id="main">
+    <section>
+        <header id="header">
+            <h1>Gallery</h1>
+            <div>
+                <label for="search">Search</label>
+                <input type="text" id="search" name="search" placeholder="Search by filename…">
+            </div>
+
+            <div>
+                <label for="amount-per-row">Per row</label>
+                <input type="range" id="amount-per-row" name="amount-per-row" min="3" max="10">
+                <output id="amount-per-row-value" class="range-value" for="amount-per-row">7</output>
+            </div>
+
+            <button>Filters</button>
+            <button>Reload</button>
+        </header>
+        <nav>
+            <button>Timeline</button>
+            <button>All</button>
+        </nav>
+    </section>
+
+    <section id="gallery-container">
+        <section id="gallery">
+
+        </section>
+    </section>
+</main>
+
+<dialog id="media-dialog">
+    <div id="viewer">
+        <div id="viewer-content">
+            <div id="viewer-stage">Image itself</div>
+            <aside id="viewer-details">
+                <div id="viewer-controls">
+                    <button id="viewer-delete" class="viewer-control" type="button">
+                        <span>del</span>
+                    </button>
+                    <button id="viewer-favorite" class="viewer-control" type="button">
+                        <span>fav</span>
+                    </button>
+                    <button id="viewer-save" class="viewer-control" type="button">
+                        <span>sav</span>
+                    </button>
+                    <button id="viewer-close" class="viewer-close" type="button">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <dl id="viewer-data"></dl>
+            </aside>
+        </div>
+        <nav id="viewer-carousel">
+            <button id="viewer-previous" class="carousel-control">
+                <span>&lsaquo;</span>
+            </button>
+            <div id="viewer-thumbnails"></div>
+            <button id="viewer-next" class="carousel-control">
+                <span>&rsaquo;</span>
+            </button>
+        </nav>
+    </div>
+</dialog>
+
+</body>
+</html>
