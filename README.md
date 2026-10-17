@@ -37,6 +37,23 @@ This is a table of the environment variables that the application uses.
 | DB_USERNAME | The user that can interact with the database |         |
 | DB_PASSWORD | The password of the user                     |         |
 
+## API
+
+### Item
+
+The item API is available under `/api/items`:
+
+| Method | Path              | Description                | Implemented |
+|:------:|-------------------|----------------------------|:-----------:|
+|  GET   | `/api/items`      | List items                 |      N      |
+|  GET   | `/api/items/{id}` | Get one item               |      N      |
+|  POST  | `/api/items`      | Create an item             |      N      |
+|  PUT   | `/api/items/{id}` | Replace an item's metadata |      N      |
+| DELETE | `/api/items/{id}` | Delete an item             |      N      |
+
+Create and update requests use the JSON fields from the `Item` record. The ID in an
+update URL is authoritative; the ID in its JSON body is ignored.
+
 ## Instructions
 
 ### Run the Application
