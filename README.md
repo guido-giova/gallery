@@ -37,6 +37,21 @@ This is a table of the environment variables that the application uses.
 | DB_USERNAME | The user that can interact with the database |         |
 | DB_PASSWORD | The password of the user                     |         |
 
+## Item API
+
+The item API is available under `/api/items`:
+
+| Method | Path              | Description                |
+|:------:|-------------------|----------------------------|
+|  GET   | `/api/items`      | List items                 |
+|  GET   | `/api/items/{id}` | Get one item               |
+|  POST  | `/api/items`      | Create an item             |
+|  PUT   | `/api/items/{id}` | Replace an item's metadata |
+| DELETE | `/api/items/{id}` | Delete an item             |
+
+Create and update requests use the JSON fields from the `Item` record. The ID in an
+update URL is authoritative; the ID in its JSON body is ignored.
+
 ## Tests
 
 The repository integration tests start a temporary PostgreSQL database in Docker and run the Flyway migrations against
