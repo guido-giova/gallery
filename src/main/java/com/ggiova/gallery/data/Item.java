@@ -16,15 +16,15 @@ package com.ggiova.gallery.data;
  * @param isFavorite  determines if the file is favorite.
  */
 public record Item(
-        long id,                     // non-nullable
-        String hash,
-        String storagePath,
-        String mime,
-        long sizeBytes,              // non-nullable
-        int width,                   // non-nullable
-        int height,                  // non-nullable
-        Long durationMs,
-        String title,
-        String description,
-        boolean isFavorite
+        long id,                    // non-nullable
+        String hash,                // non-nullable
+        String storagePath,         // non-nullable
+        String mime,                // non-nullable
+        long sizeBytes,             // non-nullable     bound: >0
+        int width,                  // non-nullable     bound: >0
+        int height,                 // non-nullable     bound: >0
+        Long durationMs,            // nullable
+        String title,               // non-nullable     default: ""
+        String description,         // non-nullable     default: ""
+        boolean isFavorite          // non-nullable     default: false
 ) {}

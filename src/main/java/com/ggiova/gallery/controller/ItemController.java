@@ -1,23 +1,18 @@
 package com.ggiova.gallery.controller;
 
 import com.ggiova.gallery.data.Item;
+import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.service.ItemService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:63342")
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/api/files")
 public class ItemController {
     private final ItemService itemService;
 
@@ -37,14 +32,11 @@ public class ItemController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Item> create(@RequestBody Item item) {
-        Item created = itemService.create(item);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(created.id())
-                .toUri();
-        return ResponseEntity.created(location).body(created);
+    @PostMapping("/upload")
+    public List<UploadResult> create(@RequestParam MultipartFile[] files) {
+        return Arrays.stream(files)
+                     .map(this.itemService::create)
+                     .toList();
     }
 
     @PutMapping("/{id}")

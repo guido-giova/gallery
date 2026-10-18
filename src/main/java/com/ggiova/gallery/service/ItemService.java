@@ -1,23 +1,88 @@
 package com.ggiova.gallery.service;
 
+import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.mapper.ItemMapper;
 import com.ggiova.gallery.repository.ItemRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.*;
 
 @Service
 public class ItemService {
+    private final Path uploadDir;
     private final ItemRepository itemRepository;
 
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(
+            ItemRepository itemRepository,
+            @Value("${app.upload-dir:uploads}") String dir
+    ) throws IOException {
         this.itemRepository = itemRepository;
+
+        this.uploadDir = Paths.get(dir).toAbsolutePath().normalize();
+        Files.createDirectories(this.uploadDir);
     }
 
-    public Item create(Item item) {
-        return itemRepository.insert(item);
+    public UploadResult create(MultipartFile mf) {
+        String original = StringUtils.cleanPath(Objects.requireNonNull(mf.getOriginalFilename(), "Null file name"));
+        String baseName = Paths.get(original).getFileName().toString();
+
+        if (mf.isEmpty()) {
+            return new UploadResult.EmptyFile();
+        }
+
+        String storedName = UUID.randomUUID() + "_" + baseName;
+        Path target = uploadDir.resolve(storedName).normalize();
+        if(! target.startsWith(uploadDir)) {
+            return new UploadResult.InvalidFilename();
+        }
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (InputStream in = new DigestInputStream(mf.getInputStream(), md)) {
+                Files.copy(in, target);
+            }
+            String hash = HexFormat.of().formatHex(md.digest());
+
+            String mime = Optional.ofNullable(Files.probeContentType(target))
+                                  .orElse(mf.getContentType());
+
+            int width, height;
+            Long durationMs = null;
+
+            if (mime != null && mime.startsWith("image/")) {
+                BufferedImage img = ImageIO.read(target.toFile());
+                if (img == null) {
+                    throw new IllegalArgumentException("Unreadable or unsupported image format");
+                }
+                width = img.getWidth();
+                height = img.getHeight();
+            } else if (mime != null && mime.startsWith("video/")) {
+                throw new UnsupportedOperationException("Video not supported yet");
+            } else {
+                throw new IllegalArgumentException("Unsupported file type: " + mime);
+            }
+
+            long id = this.itemRepository.insertNewFile(hash, storedName, mime, mf.getSize(), width, height, durationMs);
+            return new UploadResult.Success(id);
+        } catch (Exception e) {
+            try {
+                Files.deleteIfExists(target);
+            } catch (IOException ignored) {}
+            return new UploadResult.Failure(e.getLocalizedMessage());
+        }
     }
 
     public Optional<Item> findById(long id) {

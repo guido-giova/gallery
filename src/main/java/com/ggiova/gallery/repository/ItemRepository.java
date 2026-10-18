@@ -16,6 +16,15 @@ public class ItemRepository {
             duration_ms, title, description, is_favorite
             """;
 
+    private static final String QUERY_INSERT = """
+        INSERT INTO items (
+            hash, storage_path, mime, size_bytes, width, height, duration_ms
+        ) VALUES (
+            :hash, :storagePath, :mime, :sizeBytes, :width, :height, :durationMs
+        )
+        RETURNING id;
+    """;
+
     private static final RowMapper<Item> ITEM_ROW_MAPPER = ItemMapper::mapItem;
 
     private final JdbcClient jdbcClient;
@@ -24,31 +33,17 @@ public class ItemRepository {
         this.jdbcClient = jdbcClient;
     }
 
-    public Item insert(Item item) {
-        long id = jdbcClient.sql("""
-                        INSERT INTO items (
-                            hash, storage_path, mime, size_bytes, width, height,
-                            duration_ms, title, description, is_favorite
-                        ) VALUES (
-                            :hash, :storagePath, :mime, :sizeBytes, :width, :height,
-                            :durationMs, :title, :description, :isFavorite
-                        )
-                        RETURNING id
-                        """)
-                .param("hash", item.hash())
-                .param("storagePath", item.storagePath())
-                .param("mime", item.mime())
-                .param("sizeBytes", item.sizeBytes())
-                .param("width", item.width())
-                .param("height", item.height())
-                .param("durationMs", item.durationMs())
-                .param("title", item.title())
-                .param("description", item.description())
-                .param("isFavorite", item.isFavorite())
-                .query(Long.class)
-                .single();
-
-        return withId(item, id);
+    public long insertNewFile(String hash, String storedName, String mime, long size, int width, int height, Long durationMs) {
+        return this.jdbcClient.sql(QUERY_INSERT)
+                              .param("hash", hash)
+                              .param("storagePath", storedName)
+                              .param("mime", mime)
+                              .param("sizeBytes", size)
+                              .param("width", width)
+                              .param("height", height)
+                              .param("durationMs", durationMs)
+                              .query(Long.class)
+                              .single();
     }
 
     public Optional<Item> findById(long id) {
@@ -97,21 +92,5 @@ public class ItemRepository {
         return jdbcClient.sql("DELETE FROM items WHERE id = :id")
                 .param("id", id)
                 .update() > 0;
-    }
-
-    private static Item withId(Item item, long id) {
-        return new Item(
-                id,
-                item.hash(),
-                item.storagePath(),
-                item.mime(),
-                item.sizeBytes(),
-                item.width(),
-                item.height(),
-                item.durationMs(),
-                item.title(),
-                item.description(),
-                item.isFavorite()
-        );
     }
 }
