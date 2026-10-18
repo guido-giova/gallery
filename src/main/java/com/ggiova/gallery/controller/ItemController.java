@@ -60,8 +60,8 @@ public class ItemController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable long id) {
-        return itemService.deleteById(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        return this.itemService.deleteById(id)
+                               ? ResponseEntity.noContent().build()
+                               : ResponseEntity.notFound().build();
     }
 }

@@ -1,4 +1,5 @@
-import { uploadFiles, loadImages } from './api.js';
+import { uploadFiles } from './management.js';
+import { loadImages } from './load.js';
 
 export function initDropZone() {
     const dropZone = document.getElementById('drop-zone');

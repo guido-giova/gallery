@@ -16,7 +16,6 @@ public class ItemRepository {
             id, hash, storage_path, mime, size_bytes, width, height,
             duration_ms, title, description, is_favorite
             """;
-
     private static final String QUERY_INSERT = """
         INSERT INTO items (
             hash, storage_path, mime, size_bytes, width, height, duration_ms
@@ -25,9 +24,8 @@ public class ItemRepository {
         )
         RETURNING id;
     """;
-
     private static final String QUERY_LIST_ALL = "SELECT id, mime, is_favorite FROM items ORDER BY id";
-
+    private static final String QUERY_DELETE_BY_ID = "DELETE FROM items WHERE id = :id";
     private static final RowMapper<Item> ITEM_ROW_MAPPER = ItemMapper::mapItem;
 
     private final JdbcClient jdbcClient;
@@ -92,8 +90,8 @@ public class ItemRepository {
     }
 
     public boolean deleteById(long id) {
-        return jdbcClient.sql("DELETE FROM items WHERE id = :id")
-                .param("id", id)
-                .update() > 0;
+        return this.jdbcClient.sql(QUERY_DELETE_BY_ID)
+                              .param("id", id)
+                              .update() > 0;
     }
 }

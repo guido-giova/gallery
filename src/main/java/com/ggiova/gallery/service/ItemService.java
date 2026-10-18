@@ -125,6 +125,20 @@ public class ItemService {
     }
 
     public boolean deleteById(long id) {
-        return itemRepository.deleteById(id);
+        Optional<Item> found = this.itemRepository.findById(id);
+        if (found.isEmpty()) {return false;}
+        Item item = found.get();
+
+        boolean hasDeletedInDB = this.itemRepository.deleteById(id);
+
+        try {
+            Path path = uploadDir.resolve(item.storagePath()).normalize();
+            if (path.startsWith(uploadDir)) {
+                Files.deleteIfExists(path);
+            }
+        } catch (IOException | InvalidPathException e) {
+            System.err.printf("Item %d deleted but file %s could not be removed. Reason %s%n", id, item.storagePath(), e.getLocalizedMessage());
+        }
+        return true;
     }
 }
