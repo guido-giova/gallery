@@ -1,6 +1,7 @@
 package com.ggiova.gallery.repository;
 
 import com.ggiova.gallery.data.Item;
+import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.mapper.ItemMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -25,12 +26,20 @@ public class ItemRepository {
         RETURNING id;
     """;
 
+    private static final String QUERY_LIST_ALL = "SELECT id, mime, is_favorite FROM items ORDER BY id";
+
     private static final RowMapper<Item> ITEM_ROW_MAPPER = ItemMapper::mapItem;
 
     private final JdbcClient jdbcClient;
 
     public ItemRepository(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
+    }
+
+    public List<ItemListing> listAll() {
+        return this.jdbcClient.sql(QUERY_LIST_ALL)
+                              .query(ItemListing.class)
+                              .list();
     }
 
     public long insertNewFile(String hash, String storedName, String mime, long size, int width, int height, Long durationMs) {
@@ -51,12 +60,6 @@ public class ItemRepository {
                 .param("id", id)
                 .query(ITEM_ROW_MAPPER)
                 .optional();
-    }
-
-    public List<Item> findAll() {
-        return jdbcClient.sql("SELECT " + COLUMNS + " FROM items ORDER BY id")
-                .query(ITEM_ROW_MAPPER)
-                .list();
     }
 
     public boolean update(Item item) {

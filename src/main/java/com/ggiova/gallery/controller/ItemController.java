@@ -1,6 +1,7 @@
 package com.ggiova.gallery.controller;
 
 import com.ggiova.gallery.data.Item;
+import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.service.ItemService;
 import org.springframework.core.io.Resource;
@@ -23,8 +24,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<Item> findAll() {
-        return itemService.findAll();
+    public List<ItemListing> findAll() {
+        return this.itemService.listAll();
     }
 
     @GetMapping("/{id}")

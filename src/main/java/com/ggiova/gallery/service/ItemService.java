@@ -1,5 +1,6 @@
 package com.ggiova.gallery.service;
 
+import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.mapper.ItemMapper;
@@ -36,6 +37,10 @@ public class ItemService {
 
         this.uploadDir = Paths.get(dir).toAbsolutePath().normalize();
         Files.createDirectories(this.uploadDir);
+    }
+
+    public List<ItemListing> listAll() {
+        return this.itemRepository.listAll();
     }
 
     public record Content(Resource resource, String mime) {}
@@ -110,10 +115,6 @@ public class ItemService {
 
     public Optional<Item> findById(long id) {
         return itemRepository.findById(id);
-    }
-
-    public List<Item> findAll() {
-        return itemRepository.findAll();
     }
 
     public Optional<Item> update(long id, Item item) {
