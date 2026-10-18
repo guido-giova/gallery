@@ -3,6 +3,8 @@ package com.ggiova.gallery.controller;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.service.ItemService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +32,15 @@ public class ItemController {
         return itemService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/content")
+    public ResponseEntity<Resource> getContent(@PathVariable long id) {
+        return this.itemService.getContent(id)
+                               .map(c -> ResponseEntity.ok()
+                                       .contentType(MediaType.parseMediaType(c.mime()))
+                                       .body(c.resource())
+                               ).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/upload")

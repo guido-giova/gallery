@@ -109,3 +109,39 @@ fileInput.addEventListener("change", (e) => {
     // Allow selecting the same file again later.
     e.target.value = "";
 });
+
+async function loadImages() {
+    try {
+        const response = await fetch(MAIN + "/api/files");
+
+        if (!response.ok) {
+            throw new Error(`Failed to load images: ${response.status}`);
+        }
+
+        const items = await response.json();
+
+        for (const item of items) {
+            displayServerImage(item);
+        }
+    } catch (error) {
+        console.error("Error loading images:", error);
+    }
+}
+
+function displayServerImage(item) {
+    const button = document.createElement("button");
+    const img = document.createElement("img");
+
+    // Replace `id` with the appropriate field from your Item class.
+    img.src = `${MAIN}/api/files/${item.id}/content`;
+    img.alt = item.title ?? item.mime;
+    img.classList.add("media-preview");
+
+    button.classList.add("media-card");
+    button.appendChild(img);
+    button.appendChild(document.createTextNode(item.title ?? item.mime));
+
+    gallery.appendChild(button);
+}
+
+loadImages();

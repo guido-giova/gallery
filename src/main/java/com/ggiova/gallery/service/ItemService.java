@@ -5,6 +5,8 @@ import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.mapper.ItemMapper;
 import com.ggiova.gallery.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.DigestInputStream;
@@ -33,6 +36,26 @@ public class ItemService {
 
         this.uploadDir = Paths.get(dir).toAbsolutePath().normalize();
         Files.createDirectories(this.uploadDir);
+    }
+
+    public record Content(Resource resource, String mime) {}
+
+    public Optional<Content> getContent(long id) {
+        return this.itemRepository.findById(id)
+                                  .flatMap(this::getContent);
+    }
+
+    private Optional<Content> getContent(Item item) {
+        try {
+            Path path = this.uploadDir.resolve(item.storagePath()).normalize();
+
+            if (!path.startsWith(this.uploadDir) || !Files.isRegularFile(path)) {
+                return Optional.empty();
+            }
+            return Optional.of(new Content(new FileSystemResource(path), item.mime()));
+        } catch (InvalidPathException e) {
+            return Optional.empty();
+        }
     }
 
     public UploadResult create(MultipartFile mf) {
