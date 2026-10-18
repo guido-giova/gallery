@@ -10,9 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Arrays;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:63342")
 @RestController
 @RequestMapping("/api/files")
+@CrossOrigin(origins = {"${app.cors.allowed}"})
 public class ItemController {
     private final ItemService itemService;
 

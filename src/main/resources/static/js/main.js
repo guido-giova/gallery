@@ -1,4 +1,8 @@
+const MAIN = "http://localhost:4200";
+
 const dropZone = document.getElementById("drop-zone");
+const gallery = document.getElementById("gallery");
+const fileInput = document.getElementById("file-input");
 
 dropZone.addEventListener("drop", dropHandler);
 
@@ -34,33 +38,74 @@ window.addEventListener("dragover", (e) => {
     }
 });
 
-const gallery = document.getElementById("gallery");
-
 function displayImages(files) {
     for (const file of files) {
         if (file.type.startsWith("image/")) {
             const button = document.createElement("button");
             const img = document.createElement("img");
+
             img.src = URL.createObjectURL(file);
             img.alt = file.name;
             img.classList.add("media-preview");
+
             button.classList.add("media-card");
             button.appendChild(img);
             button.appendChild(document.createTextNode(file.name));
+
             gallery.appendChild(button);
         }
     }
 }
 
-function dropHandler(ev) {
-    ev.preventDefault();
-    const files = [...ev.dataTransfer.items]
-        .map((item) => item.getAsFile())
-        .filter((file) => file);
-    displayImages(files);
+async function uploadFiles(files) {
+    const imageFiles = [...files].filter((file) =>
+        file.type.startsWith("image/"),
+    );
+
+    if (imageFiles.length === 0) { return; }
+
+    const formData = new FormData();
+    for (const file of imageFiles) {
+        formData.append("files", file);
+    }
+
+    try {
+        const response = await fetch(MAIN + "/api/files/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+        }
+
+        const results = await response.json();
+        console.log("Upload successful:", results);
+
+        return results;
+    } catch (error) {
+        console.error("Error uploading files:", error);
+    }
 }
 
-const fileInput = document.getElementById("file-input");
+function dropHandler(ev) {
+    ev.preventDefault();
+
+    const files = [...ev.dataTransfer.items]
+        .filter((item) => item.kind === "file")
+        .map((item) => item.getAsFile())
+        .filter((file) => file !== null);
+
+    displayImages(files);
+    uploadFiles(files);
+}
+
 fileInput.addEventListener("change", (e) => {
-    displayImages(e.target.files);
+    const files = [...e.target.files];
+
+    displayImages(files);
+    uploadFiles(files);
+
+    // Allow selecting the same file again later.
+    e.target.value = "";
 });
