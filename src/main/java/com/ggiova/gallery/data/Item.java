@@ -14,6 +14,7 @@ package com.ggiova.gallery.data;
  * @param title       of the file.
  * @param description of the file.
  * @param isFavorite  determines if the file is favorite.
+ * @param wasReviewed determines if the file has been reviewed. For when files are automatically added instead of uploaded by the user.
  */
 public record Item(
         long id,                    // non-nullable
@@ -26,5 +27,6 @@ public record Item(
         Long durationMs,            // nullable
         String title,               // non-nullable     default: ""
         String description,         // non-nullable     default: ""
-        boolean isFavorite          // non-nullable     default: false
+        boolean isFavorite,         // non-nullable     default: false
+        boolean wasReviewed         // non-nullable     default: false
 ) {}

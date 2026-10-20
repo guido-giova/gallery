@@ -52,6 +52,11 @@ public class ItemController {
                      .toList();
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> review(@PathVariable long id) {
+        return this.itemService.review(id).toResponseEntity();
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> update(@PathVariable long id, @RequestBody ItemUpdate item) {
         return this.itemService.update(id, item)

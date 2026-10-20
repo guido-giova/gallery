@@ -18,7 +18,8 @@ public final class ItemMapper {
                 resultSet.getObject("duration_ms", Long.class),
                 resultSet.getString("title"),
                 resultSet.getString("description"),
-                resultSet.getBoolean("is_favorite")
+                resultSet.getBoolean("is_favorite"),
+                resultSet.getBoolean("was_reviewed")
         );
     }
 
@@ -34,7 +35,8 @@ public final class ItemMapper {
                 item.durationMs(),
                 item.title(),
                 item.description(),
-                item.isFavorite()
+                item.isFavorite(),
+                item.wasReviewed()
         );
     }
 }

@@ -19,11 +19,12 @@ public class ItemRepository {
         )
         RETURNING id;
     """;
-    private static final String QUERY_LIST_ALL = "SELECT id, mime, is_favorite FROM items ORDER BY id";
-    private static final String QUERY_FIND_BY_ID = "SELECT id, hash, storage_path, mime, size_bytes, width, height, duration_ms, title, description, is_favorite FROM items WHERE id = :id";
+    private static final String QUERY_LIST_ALL = "SELECT id, mime, is_favorite, was_reviewed FROM items ORDER BY id";
+    private static final String QUERY_FIND_BY_ID = "SELECT * FROM items WHERE id = :id";
     private static final String QUERY_UPDATE_IS_FAVORITE = "UPDATE items SET is_favorite = :isFavorite WHERE id = :id;";
     private static final String QUERY_UPDATE_TITLE = "UPDATE items SET title = :title WHERE id = :id;";
     private static final String QUERY_UPDATE_DESCRIPTION = "UPDATE items SET description = :description WHERE id = :id;";
+    private static final String QUERY_UPDATE_REVIEWED = "UPDATE items SET was_reviewed = TRUE WHERE id = :id;";
     private static final String QUERY_DELETE_BY_ID = "DELETE FROM items WHERE id = :id";
 
     private final JdbcClient jdbcClient;
@@ -75,6 +76,12 @@ public class ItemRepository {
     public boolean updateDescription(long id, String description) {
         return this.jdbcClient.sql(QUERY_UPDATE_DESCRIPTION)
                               .param("description", description)
+                              .param("id", id)
+                              .update() > 0;
+    }
+
+    public boolean review(long id) {
+        return this.jdbcClient.sql(QUERY_UPDATE_REVIEWED)
                               .param("id", id)
                               .update() > 0;
     }
