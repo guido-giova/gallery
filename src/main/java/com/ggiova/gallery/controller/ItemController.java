@@ -17,7 +17,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
-@CrossOrigin(origins = {"${app.cors.allowed}"})
 public class ItemController {
     private final ItemService itemService;
 
@@ -51,6 +50,11 @@ public class ItemController {
         return Arrays.stream(files)
                      .map(this.itemService::create)
                      .toList();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> review(@PathVariable long id) {
+        return this.itemService.review(id).toResponseEntity();
     }
 
     @PutMapping("/{id}")

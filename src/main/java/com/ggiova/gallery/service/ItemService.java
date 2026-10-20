@@ -2,8 +2,10 @@ package com.ggiova.gallery.service;
 
 import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.dto.ItemListing;
+import com.ggiova.gallery.dto.ReviewResult;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
+import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -42,8 +44,6 @@ public class ItemService {
     public List<ItemListing> listAll() {
         return this.itemRepository.listAll();
     }
-
-    public record Content(Resource resource, String mime) {}
 
     public Optional<Content> getContent(long id) {
         return this.itemRepository.findById(id)
@@ -117,11 +117,21 @@ public class ItemService {
         return itemRepository.findById(id);
     }
 
+    public ReviewResult review(long id) {
+        Optional<Item> item = this.findById(id);
+        if (item.isEmpty()) {
+            return new ReviewResult.NotFound();
+        }
+        return this.itemRepository.review(id) ?
+                  new ReviewResult.Reviewed() :
+                  new ReviewResult.AlreadyReviewed();
+    }
+
     public Optional<Map<String, String>> update(long id, ItemUpdate itemUpdate) {
         Map<String, String> response = new HashMap<>();
 
-        Optional<Item> found = this.itemRepository.findById(id);
-        if (found.isEmpty()) {
+        ReviewResult view = this.review(id);
+        if (view instanceof ReviewResult.NotFound()) {
             return Optional.empty();
         }
 
