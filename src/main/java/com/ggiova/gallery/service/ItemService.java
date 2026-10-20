@@ -4,6 +4,7 @@ import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
+import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -42,8 +43,6 @@ public class ItemService {
     public List<ItemListing> listAll() {
         return this.itemRepository.listAll();
     }
-
-    public record Content(Resource resource, String mime) {}
 
     public Optional<Content> getContent(long id) {
         return this.itemRepository.findById(id)
