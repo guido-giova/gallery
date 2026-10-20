@@ -1,0 +1,5 @@
+ALTER TABLE items
+    ALTER COLUMN title SET DEFAULT '',
+    ALTER COLUMN title SET NOT NULL,
+    ALTER COLUMN description SET DEFAULT '',
+    ALTER COLUMN description SET NOT NULL;
