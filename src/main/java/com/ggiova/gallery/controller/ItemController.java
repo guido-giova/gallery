@@ -1,5 +1,6 @@
 package com.ggiova.gallery.controller;
 
+import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
@@ -52,10 +54,10 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Item> update(@PathVariable long id, @RequestBody Item item) {
-        return itemService.update(id, item)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Map<String, String>> update(@PathVariable long id, @RequestBody ItemUpdate item) {
+        return this.itemService.update(id, item)
+                               .map(ResponseEntity::ok)
+                               .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

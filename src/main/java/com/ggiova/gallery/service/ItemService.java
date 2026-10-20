@@ -1,9 +1,9 @@
 package com.ggiova.gallery.service;
 
+import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
-import com.ggiova.gallery.mapper.ItemMapper;
 import com.ggiova.gallery.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -117,11 +117,42 @@ public class ItemService {
         return itemRepository.findById(id);
     }
 
-    public Optional<Item> update(long id, Item item) {
-        Item itemWithPathId = ItemMapper.copyWithId(item, id);
-        return itemRepository.update(itemWithPathId)
-                ? Optional.of(itemWithPathId)
-                : Optional.empty();
+    public Optional<Map<String, String>> update(long id, ItemUpdate itemUpdate) {
+        Map<String, String> response = new HashMap<>();
+
+        Optional<Item> found = this.itemRepository.findById(id);
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (itemUpdate.isFavorite() != null) {
+            boolean isSuccess = this.itemRepository.updateFavorite(id, itemUpdate.isFavorite());
+            if (isSuccess) {
+                response.put("favorite", "success");
+            } else {
+                response.put("favorite", "failure");
+            }
+        }
+
+        if (itemUpdate.title() != null) {
+            boolean isSuccess = this.itemRepository.updateTitle(id, itemUpdate.title());
+            if (isSuccess) {
+                response.put("title", "success");
+            } else {
+                response.put("title", "failure");
+            }
+        }
+
+        if (itemUpdate.description() != null) {
+            boolean isSuccess = this.itemRepository.updateDescription(id, itemUpdate.description());
+            if (isSuccess) {
+                response.put("description", "success");
+            } else {
+                response.put("description", "failure");
+            }
+        }
+
+        return Optional.of(response);
     }
 
     public boolean deleteById(long id) {

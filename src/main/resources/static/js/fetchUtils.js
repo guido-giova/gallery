@@ -11,8 +11,21 @@ export function del() {
     };
 }
 
-export function postFavorite(isFavorite) {
-    return post({
-        isFavorite: isFavorite
-    });
+export function put(putBody) {
+    return {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(putBody)
+    };
+}
+
+export function favorite(isFavorite) {
+    return put({
+            isFavorite: isFavorite,
+            title: null,
+            description: null
+        }
+    );
 }

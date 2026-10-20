@@ -60,32 +60,36 @@ public class ItemRepository {
                 .optional();
     }
 
-    public boolean update(Item item) {
-        return jdbcClient.sql("""
-                        UPDATE items
-                        SET hash = :hash,
-                            storage_path = :storagePath,
-                            mime = :mime,
-                            size_bytes = :sizeBytes,
-                            width = :width,
-                            height = :height,
-                            duration_ms = :durationMs,
-                            title = :title,
-                            description = :description,
-                            is_favorite = :isFavorite
-                        WHERE id = :id
-                        """)
-                .param("id", item.id())
-                .param("hash", item.hash())
-                .param("storagePath", item.storagePath())
-                .param("mime", item.mime())
-                .param("sizeBytes", item.sizeBytes())
-                .param("width", item.width())
-                .param("height", item.height())
-                .param("durationMs", item.durationMs())
-                .param("title", item.title())
-                .param("description", item.description())
-                .param("isFavorite", item.isFavorite())
+    public boolean updateFavorite(long id, boolean isFavorite) {
+        return this.jdbcClient.sql("""
+    UPDATE items
+    SET is_favorite = :isFavorite
+    WHERE id = :id;
+""")
+                .param("isFavorite", isFavorite)
+                .param("id", id)
+                .update() > 0;
+    }
+
+    public boolean updateTitle(long id, String title) {
+        return this.jdbcClient.sql("""
+    UPDATE items
+    SET title = :title
+    WHERE id = :id;
+""")
+                .param("title", title)
+                .param("id", id)
+                .update() > 0;
+    }
+
+    public boolean updateDescription(long id, String description) {
+        return this.jdbcClient.sql("""
+    UPDATE items
+    SET description = :description
+    WHERE id = :id;
+""")
+                .param("description", description)
+                .param("id", id)
                 .update() > 0;
     }
 

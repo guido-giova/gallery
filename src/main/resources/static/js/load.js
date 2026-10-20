@@ -1,5 +1,5 @@
 import { address } from "./address.js";
-import {post, del, postFavorite} from "./fetchUtils.js";
+import {post, del, favorite} from "./fetchUtils.js";
 
 const gallery = document.getElementById('gallery');
 const mediaDialog = document.getElementById('media-dialog');
@@ -49,6 +49,9 @@ function makeCard(item) {
     card.className = "media-card";
     card.type = "button";
     card.addEventListener("click", () => openViewer(item, preview));
+    if (item["isFavorite"]) {
+        card.classList.add("is-favorite");
+    }
 
     const preview = document.createElement("img");
     preview.className = "media-preview";
@@ -119,24 +122,27 @@ function toggleFavorite() {
         } else {
             makeFavorite(selectedItem);
         }
+        fetch(
+            address(`/api/files/${selectedItem["id"]}`),
+            favorite(selectedItem["isFavorite"])
+        )
+        .then(r => {
+            console.log(r)
+        })
+        .catch(e => {
+            console.error(e);
+        })
     }
 }
 
-async function makeFavorite(data) {
-    data["card"].classList.add("is-favorite");
-    data["isFavorite"] = true;
-
-    const response = await fetch(
-        address(`/api/files/${data["id"]}`),
-        postFavorite(true)
-    );
+function makeFavorite(item) {
+    item["card"].classList.add("is-favorite");
+    item["isFavorite"] = true;
 }
 
-async function notFavorite(data) {
-    data["card"].classList.remove("is-favorite");
-    data["isFavorite"] = false;
-
-    const response = await fetch(address("/api/files"));
+function notFavorite(item) {
+    item["card"].classList.remove("is-favorite");
+    item["isFavorite"] = false;
 }
 
 async function remove() {
