@@ -17,7 +17,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
-@CrossOrigin(origins = {"${app.cors.allowed}"})
 public class ItemController {
     private final ItemService itemService;
 
