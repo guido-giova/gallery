@@ -1,5 +1,7 @@
 package com.ggiova.gallery.service;
 
+import com.ggiova.gallery.components.file.FileStorage;
+import com.ggiova.gallery.components.file.FileStorageResponse;
 import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.ReviewResult;
@@ -7,38 +9,26 @@ import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ItemService {
-    private final Path uploadDir;
     private final ItemRepository itemRepository;
+    private final FileStorage storage;
 
     public ItemService(
             ItemRepository itemRepository,
-            @Value("${app.upload-dir:uploads}") String dir
-    ) throws IOException {
+            FileStorage storage
+    ) {
         this.itemRepository = itemRepository;
-
-        this.uploadDir = Paths.get(dir).toAbsolutePath().normalize();
-        Files.createDirectories(this.uploadDir);
+        this.storage        = storage;
     }
 
     public List<ItemListing> listAll() {
@@ -46,70 +36,43 @@ public class ItemService {
     }
 
     public Optional<Content> getContent(long id) {
-        return this.itemRepository.findById(id)
-                                  .flatMap(this::getContent);
-    }
-
-    private Optional<Content> getContent(Item item) {
-        try {
-            Path path = this.uploadDir.resolve(item.storagePath()).normalize();
-
-            if (!path.startsWith(this.uploadDir) || !Files.isRegularFile(path)) {
-                return Optional.empty();
-            }
-            return Optional.of(new Content(new FileSystemResource(path), item.mime()));
-        } catch (InvalidPathException e) {
-            return Optional.empty();
-        }
+        return itemRepository.findById(id)
+                             .flatMap(item -> storage.load(item.storagePath())
+                             .map(res -> new Content(res, item.mime())));
     }
 
     public UploadResult create(MultipartFile mf) {
-        String original = StringUtils.cleanPath(Objects.requireNonNull(mf.getOriginalFilename(), "Null file name"));
-        String baseName = Paths.get(original).getFileName().toString();
+        return this.storage.store(mf)
+                           .mapTo(UploadResult.class)
+                           .onEmpty(UploadResult.EmptyFile::new)
+                           .onStored(this::register)
+                           .onError(ItemService::createCouldNotStoreTheFile)
+                           .resolve();
+    }
 
-        if (mf.isEmpty()) {
-            return new UploadResult.EmptyFile();
-        }
+    private static UploadResult.Failure createCouldNotStoreTheFile() {
+        return new UploadResult.Failure("Could not store the file");
+    }
 
-        String storedName = UUID.randomUUID() + "_" + baseName;
-        Path target = uploadDir.resolve(storedName).normalize();
-        if(! target.startsWith(uploadDir)) {
-            return new UploadResult.InvalidFilename();
-        }
-
+    private UploadResult register(FileStorageResponse.StoredFile stored) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            try (InputStream in = new DigestInputStream(mf.getInputStream(), md)) {
-                Files.copy(in, target);
-            }
-            String hash = HexFormat.of().formatHex(md.digest());
-
-            String mime = Optional.ofNullable(Files.probeContentType(target))
-                                  .orElse(mf.getContentType());
-
-            int width, height;
-            Long durationMs = null;
-
-            if (mime != null && mime.startsWith("image/")) {
-                BufferedImage img = ImageIO.read(target.toFile());
-                if (img == null) {
-                    throw new IllegalArgumentException("Unreadable or unsupported image format");
-                }
-                width = img.getWidth();
-                height = img.getHeight();
-            } else if (mime != null && mime.startsWith("video/")) {
-                throw new UnsupportedOperationException("Video not supported yet");
-            } else {
-                throw new IllegalArgumentException("Unsupported file type: " + mime);
-            }
-
-            long id = this.itemRepository.insertNewFile(hash, storedName, mime, mf.getSize(), width, height, durationMs);
+            long id = this.itemRepository.insertNewFile(
+                    stored.hash(),
+                    stored.storagePath(),
+                    stored.mime(),
+                    stored.sizeBytes(),
+                    stored.width(),
+                    stored.height(),
+                    stored.durationMs()
+            );
             return new UploadResult.Success(id);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            System.err.printf("Failed to register file %s.%n", stored.storagePath());
             try {
-                Files.deleteIfExists(target);
-            } catch (IOException ignored) {}
-            return new UploadResult.Failure(e.getLocalizedMessage());
+                this.storage.delete(stored.storagePath());
+            } catch (IOException ignored) {
+            }
+            return new UploadResult.Failure("Could not store the file");
         }
     }
 
@@ -128,7 +91,7 @@ public class ItemService {
     }
 
     public Optional<Map<String, String>> update(long id, ItemUpdate itemUpdate) {
-        Map<String, String> response = new HashMap<>();
+        Map<String, String> response = new java.util.HashMap<>();
 
         ReviewResult view = this.review(id);
         if (view instanceof ReviewResult.NotFound()) {
@@ -167,16 +130,13 @@ public class ItemService {
 
     public boolean deleteById(long id) {
         Optional<Item> found = this.itemRepository.findById(id);
-        if (found.isEmpty()) {return false;}
+        if (found.isEmpty()) { return false; }
         Item item = found.get();
 
-        boolean hasDeletedInDB = this.itemRepository.deleteById(id);
+        this.itemRepository.deleteById(id);
 
         try {
-            Path path = uploadDir.resolve(item.storagePath()).normalize();
-            if (path.startsWith(uploadDir)) {
-                Files.deleteIfExists(path);
-            }
+            storage.delete(item.storagePath());
         } catch (IOException | InvalidPathException e) {
             System.err.printf("Item %d deleted but file %s could not be removed. Reason %s%n", id, item.storagePath(), e.getLocalizedMessage());
         }
