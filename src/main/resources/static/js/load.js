@@ -26,11 +26,13 @@ export async function loadImages() {
 
         const fragment = document.createDocumentFragment();
 
+        console.log(items);
         items = (await response.json())
             .map((item) => {
                 const result = [];
                 result["id"] = item.id;
                 result["isFavorite"] = item.isFavorite;
+                result["mime"] = item.mime;
 
                 const card = makeCard(result);
                 fragment.append(card);
@@ -48,18 +50,30 @@ function makeCard(item) {
     const card = document.createElement("button");
     card.className = "media-card";
     card.type = "button";
-    card.addEventListener("click", () => openViewer(item, preview));
     if (item["isFavorite"]) {
         card.classList.add("is-favorite");
     }
 
-    const preview = document.createElement("img");
-    preview.className = "media-preview";
-    preview.src = address(`/api/files/${item["id"]}/content`);
-    preview.loading  = "lazy";
-    preview.decoding = "async";
-    card.append(preview);
-
+    if (item["mime"].startsWith("video/")) {
+        const preview = document.createElement("video");
+        preview.className = "media-preview";
+        preview.src = address(`/api/files/${item["id"]}/content`);
+        preview.loading  = "lazy";
+        preview.controls = false;
+        preview.preload = "metadata";
+        preview.muted = true;
+        preview.autoplay = true;
+        card.append(preview);
+        card.addEventListener("click", () => openViewer(item, preview));
+    } else {
+        const preview = document.createElement("img");
+        preview.className = "media-preview";
+        preview.src = address(`/api/files/${item["id"]}/content`);
+        preview.loading  = "lazy";
+        preview.decoding = "async";
+        card.append(preview);
+        card.addEventListener("click", () => openViewer(item, preview));
+    }
     return card;
 }
 

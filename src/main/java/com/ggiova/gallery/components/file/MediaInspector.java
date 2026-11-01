@@ -1,6 +1,8 @@
 package com.ggiova.gallery.components.file;
 
 import org.apache.tika.Tika;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -14,10 +16,13 @@ import java.util.Set;
 
 @Component
 public class MediaInspector {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MediaInspector.class);
+
     // Only supports this types
     private static final Set<String> VIDEO_TYPES = Set.of(
             "video/mp4",
-            "video/webm"
+            "video/webm",
+            "video/quicktime"
     );
 
     private final Tika tika = new Tika();
@@ -36,6 +41,8 @@ public class MediaInspector {
         try {
             // Detected from the file's bytes, not its name or the client's Content-Type.
             String mime = this.tika.detect(path);
+            LOGGER.info("Tika detected '{}' for {}", mime, path.getFileName());
+
             if (VIDEO_TYPES.contains(mime)) {
                 return this.videoInspector.inspect(path, mime);
             }

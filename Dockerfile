@@ -17,6 +17,11 @@ RUN ./mvnw -B -DskipTests package
 FROM eclipse-temurin:25-jre
 WORKDIR /app
 
+# Install ffmpeg for ffprobe
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 # Run as a non-root user, and give it a writable uploads folder
 RUN useradd --system --create-home appuser \
     && mkdir -p /app/uploads \

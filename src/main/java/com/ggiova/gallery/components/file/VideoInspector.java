@@ -43,6 +43,7 @@ public class VideoInspector {
                 return new MediaResponse.Failed("ffprobe timed out");
             }
             if (process.exitValue() != 0) {
+                LOGGER.warn("ffprobe exited with {} for {}", process.exitValue(), path.getFileName());
                 return new MediaResponse.UnknownMedia();
             }
 

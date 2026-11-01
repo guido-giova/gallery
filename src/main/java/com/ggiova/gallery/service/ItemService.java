@@ -50,12 +50,17 @@ public class ItemService {
                            .mapTo(UploadResult.class)
                            .onEmpty(UploadResult.EmptyFile::new)
                            .onStored(this::register)
+                           .onNotSupported(ItemService::createUnsupportedMedia)
                            .onError(ItemService::createCouldNotStoreTheFile)
                            .resolve();
     }
 
     private static UploadResult.Failure createCouldNotStoreTheFile() {
         return new UploadResult.Failure("Could not store the file");
+    }
+
+    private static UploadResult.Failure createUnsupportedMedia() {
+        return new UploadResult.Failure("Unsupported or unreadable file type");
     }
 
     private UploadResult register(FileStorageResponse.StoredFile stored) {
