@@ -7,9 +7,10 @@ import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,8 @@ import java.util.*;
 
 @Service
 public class ItemService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ItemService.class);
+
     private final Path uploadDir;
     private final ItemRepository itemRepository;
 
@@ -178,7 +181,7 @@ public class ItemService {
                 Files.deleteIfExists(path);
             }
         } catch (IOException | InvalidPathException e) {
-            System.err.printf("Item %d deleted but file %s could not be removed. Reason %s%n", id, item.storagePath(), e.getLocalizedMessage());
+            LOGGER.error("Item {} deleted but file {} could not be removed. Reason {}.", id, item.storagePath(), e.getLocalizedMessage(), e);
         }
         return true;
     }
