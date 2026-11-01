@@ -39,10 +39,10 @@ public class ItemRepository {
                               .list();
     }
 
-    public long insertNewFile(String hash, String storedName, String mime, long size, int width, int height, Long durationMs) {
+    public long insertNewFile(String hash, String storagePath, String mime, long size, int width, int height, Long durationMs) {
         return this.jdbcClient.sql(QUERY_INSERT)
                               .param("hash", hash)
-                              .param("storagePath", storedName)
+                              .param("storagePath", storagePath)
                               .param("mime", mime)
                               .param("sizeBytes", size)
                               .param("width", width)
