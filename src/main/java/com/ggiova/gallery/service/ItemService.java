@@ -1,6 +1,5 @@
 package com.ggiova.gallery.service;
 
-import com.ggiova.gallery.config.AppProperties;
 import com.ggiova.gallery.components.file.FileStorage;
 import com.ggiova.gallery.components.file.FileStorageResponse;
 import com.ggiova.gallery.dto.ItemUpdate;
@@ -12,8 +11,6 @@ import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +29,6 @@ public class ItemService {
 
     public ItemService(
             ItemRepository itemRepository,
-            AppProperties aps,
             FileStorage storage
     ) {
         this.itemRepository = itemRepository;

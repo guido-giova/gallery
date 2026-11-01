@@ -1,9 +1,8 @@
 package com.ggiova.gallery.components.file;
 
-import com.ggiova.gallery.service.ItemService;
+import com.ggiova.gallery.config.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,17 +28,16 @@ public class FileStorage {
     private final MediaInspector mediaInspector;
 
     public FileStorage(
-            @Value("${app.upload-dir:uploads}") String directory,
+            AppProperties aps,
             MediaInspector mediaInspector
     ) throws IOException {
-        this.directory = FileStorage.setDirectory(directory);
+        this.directory = FileStorage.setDirectory(aps.path());
         this.mediaInspector = mediaInspector;
     }
 
-    private static Path setDirectory(String directory) throws IOException {
-        Path pathDirectory = Paths.get(directory).toAbsolutePath().normalize();
-        Files.createDirectories(pathDirectory);
-        return pathDirectory;
+    private static Path setDirectory(Path path) throws IOException {
+        Files.createDirectories(path);
+        return path;
     }
 
     public Optional<Resource> load(String storagePath) {
