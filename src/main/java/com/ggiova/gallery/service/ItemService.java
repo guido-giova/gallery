@@ -9,7 +9,6 @@ import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,11 +25,24 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.*;
 
+/**
+ * Service layer of the system. Manages the items' listing ({@link ItemService#listAll()}), content retrieval
+ * ({@link ItemService#getContent(long)}), creation ({@link ItemService#create(MultipartFile)}), finding
+ * ({@link ItemService#findById(long)}), review ({@link ItemService#review(long)}), update
+ * ({@link ItemService#update(long, ItemUpdate)}), and delete ({@link ItemService#deleteById(long)}).
+ */
 @Service
 public class ItemService {
     private final Path uploadDir;
     private final ItemRepository itemRepository;
 
+    /**
+     * ItemService's constructor.
+     *
+     * @param itemRepository Repository that stores the items.
+     * @param dir            Where files are stored.
+     * @throws IOException if any I/O error occurs.
+     */
     public ItemService(
             ItemRepository itemRepository,
             @Value("${app.upload-dir:uploads}") String dir
@@ -41,10 +53,21 @@ public class ItemService {
         Files.createDirectories(this.uploadDir);
     }
 
+    /**
+     * Lists all items.
+     *
+     * @return all items.
+     */
     public List<ItemListing> listAll() {
         return this.itemRepository.listAll();
     }
 
+    /**
+     * Gets the content of the specified id.
+     *
+     * @param id Of the content that is requested.
+     * @return The content itself.
+     */
     public Optional<Content> getContent(long id) {
         return this.itemRepository.findById(id)
                                   .flatMap(this::getContent);
@@ -63,6 +86,12 @@ public class ItemService {
         }
     }
 
+    /**
+     * Creates a new item based on the given content.
+     *
+     * @param mf content for which a file will be created.
+     * @return An {@link UploadResult} that represents what happened.
+     */
     public UploadResult create(MultipartFile mf) {
         String original = StringUtils.cleanPath(Objects.requireNonNull(mf.getOriginalFilename(), "Null file name"));
         String baseName = Paths.get(original).getFileName().toString();
@@ -108,15 +137,28 @@ public class ItemService {
         } catch (Exception e) {
             try {
                 Files.deleteIfExists(target);
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
             return new UploadResult.Failure(e.getLocalizedMessage());
         }
     }
 
+    /**
+     * Finds the item based on the given id.
+     *
+     * @param id That will be used to search.
+     * @return An {@link Optional} that contains the item if found, an empty optional otherwise.
+     */
     public Optional<Item> findById(long id) {
         return itemRepository.findById(id);
     }
 
+    /**
+     * Makes an item count as viewed.
+     *
+     * @param id of the item that will be viewed.
+     * @return A {@link ReviewResult} that informs if it's been reviewed or already has.
+     */
     public ReviewResult review(long id) {
         Optional<Item> item = this.findById(id);
         if (item.isEmpty()) {
@@ -127,6 +169,13 @@ public class ItemService {
                   new ReviewResult.AlreadyReviewed();
     }
 
+    /**
+     * Updates the data
+     *
+     * @param id         of the item that will be updated.
+     * @param itemUpdate New data.
+     * @return A {@link Map} with information about the changes.
+     */
     public Optional<Map<String, String>> update(long id, ItemUpdate itemUpdate) {
         Map<String, String> response = new HashMap<>();
 
@@ -165,9 +214,17 @@ public class ItemService {
         return Optional.of(response);
     }
 
+    /**
+     * Deletes the item of a given id.
+     *
+     * @param id of the item that will be deleted.
+     * @return {@code true} if it was deleted, {@code false} otherwise.
+     */
     public boolean deleteById(long id) {
         Optional<Item> found = this.itemRepository.findById(id);
-        if (found.isEmpty()) {return false;}
+        if (found.isEmpty()) {
+            return false;
+        }
         Item item = found.get();
 
         boolean hasDeletedInDB = this.itemRepository.deleteById(id);
