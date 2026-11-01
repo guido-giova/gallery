@@ -1,5 +1,6 @@
 package com.ggiova.gallery.service;
 
+import com.ggiova.gallery.config.AppProperties;
 import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.ReviewResult;
@@ -7,7 +8,6 @@ import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -33,12 +33,10 @@ public class ItemService {
 
     public ItemService(
             ItemRepository itemRepository,
-            @Value("${app.storage.path}") String dir
-    ) throws IOException {
+            AppProperties aps
+    ) {
         this.itemRepository = itemRepository;
-
-        this.uploadDir = Paths.get(dir).toAbsolutePath().normalize();
-        Files.createDirectories(this.uploadDir);
+        this.uploadDir = aps.path();
     }
 
     public List<ItemListing> listAll() {
