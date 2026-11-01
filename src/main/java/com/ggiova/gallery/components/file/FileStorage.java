@@ -1,5 +1,8 @@
 package com.ggiova.gallery.components.file;
 
+import com.ggiova.gallery.service.ItemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -21,6 +24,8 @@ import java.util.UUID;
 
 @Component
 public class FileStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileStorage.class);
+
     private final Path directory;
     private final MediaInspector mediaInspector;
 
@@ -92,16 +97,15 @@ public class FileStorage {
                     yield new FileStorageResponse.UnsupportedMedia();
                 }
                 case MediaResponse.Failed f -> {
-                    System.err.printf("Could not inspect %s: %s%n", storedName, f.message());
+                    LOGGER.error("Could not inspect {}: {}", storedName, f.message());
                     this.deleteQuietly(target);
                     yield new FileStorageResponse.Error(f.message());
                 }
             };
         } catch (IOException | NoSuchAlgorithmException | RuntimeException e) {
-            System.err.printf("Failed to store uploaded file %s%n", storedName);
+            LOGGER.error("Failed to stored uploaded file {}", storedName, e);
             this.deleteQuietly(target);
             return new FileStorageResponse.Error(e.getMessage());
         }
     }
-
 }
