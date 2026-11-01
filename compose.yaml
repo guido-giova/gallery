@@ -32,5 +32,12 @@ services:
       - ${STORAGE_PATH:?Set STORAGE_PATH in .env}:/app/uploads
       - ./logs:/app/logs
 
+  web:
+    build: ../gallery-ui
+    ports:
+      - "8082:80"
+    depends_on:
+      - app
+
 volumes:
   pgdata:
