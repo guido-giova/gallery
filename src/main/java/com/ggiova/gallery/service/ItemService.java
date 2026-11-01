@@ -33,7 +33,7 @@ public class ItemService {
 
     public ItemService(
             ItemRepository itemRepository,
-            @Value("${app.upload-dir:uploads}") String dir
+            @Value("${app.storage.path}") String dir
     ) throws IOException {
         this.itemRepository = itemRepository;
 

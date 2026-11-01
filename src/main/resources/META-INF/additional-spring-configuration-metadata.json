@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "app.storage.path",
+      "type": "java.lang.String",
+      "description": "Path to where files will be stored."
+    }
+  ]
+}

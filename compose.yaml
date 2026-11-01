@@ -25,11 +25,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/gallery
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      STORAGE_PATH: /app/uploads
     ports:
       - "8081:8081"
     volumes:
-      - uploads:/app/uploads
+      - ${STORAGE_PATH:?Set STORAGE_PATH in .env}:/app/uploads
 
 volumes:
   pgdata:
-  uploads:
