@@ -3,7 +3,6 @@ package com.ggiova.gallery.components.file;
 import com.ggiova.gallery.config.AppProperties;
 import com.ggiova.gallery.data.VariantKind;
 import com.ggiova.gallery.util.Strings;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
