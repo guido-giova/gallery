@@ -70,13 +70,14 @@ public class ItemService {
     }
 
     private UploadResult register(FileStorageResponse.StoredFile stored) {
-        LOGGER.info("Registering file and its variants: {}.", stored.hash());
         Long id = null;
         try {
             id = this.itemRepository.insertNewFile(stored.hash(), stored.sizeBytes(), stored.width(), stored.height(), stored.durationMs());
 
+            LOGGER.info("Registering file {} with {} variants", id, stored.variants().size());
             for (StoredVariant sv : stored.variants()) {
-                this.variantRepository.insertNewVariant(id, sv.kind(), sv.storagePath(), sv.mime());
+                long variantId = this.variantRepository.insertNewVariant(id, sv.kind(), sv.storagePath(), sv.mime());
+                LOGGER.debug("Inserted variant {} ({}) for file {}", variantId, sv.kind(), id);
             }
             return new UploadResult.Success(id);
         } catch (RuntimeException e) {
