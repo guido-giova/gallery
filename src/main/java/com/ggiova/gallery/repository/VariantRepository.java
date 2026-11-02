@@ -43,8 +43,7 @@ public class VariantRepository {
         return this.jdbcClient.sql(QUERY_FIND_BY_ITEM_ID)
                               .param("itemId", itemId)
                               .query(VariantMapper::mapVariant)
-                              .stream()
-                              .toList();
+                              .list();
     }
 
     public Optional<Variant> findByParentIdAndVariant(long itemId, String variant) {
