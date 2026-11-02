@@ -13,6 +13,8 @@ public class MediaTranscoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaTranscoder.class);
     private static final int TIMEOUT_MINUTES_IMAGE = 1;
     private static final int TIMEOUT_MINUTES_VIDEO = 15;
+    private static final int VIDEO_SIZE = 360;
+    private static final int MAX_IMAGE_SIZE = 500;
 
     public boolean createVideoThumbnail(Path source, Path target) {
         return this.run(
@@ -22,7 +24,7 @@ public class MediaTranscoder {
                 "ffmpeg", "-nostdin", "-y",
                 "-i", source.toString(),
                 "-map", "0:v:0",
-                "-vf", "scale=-2:'min(480,ih)'",          // max 480p, never upscale
+                "-vf", "scale=-2:'min(" + VIDEO_SIZE + ",ih)'",
                 "-r", "24",
                 "-c:v", "libx264", "-crf", "32", "-preset", "veryfast",
                 "-pix_fmt", "yuv420p",
@@ -42,7 +44,7 @@ public class MediaTranscoder {
                 "-y",
                 "-i", source.toString(),
                 "-frames:v", "1",
-                "-vf", "scale='min(500,iw)':'min(500,ih)':force_original_aspect_ratio=decrease",
+                "-vf", "scale='min(" + MAX_IMAGE_SIZE + ",iw)':'min(" + MAX_IMAGE_SIZE + ",ih)':force_original_aspect_ratio=decrease",
                 "-c:v", "mjpeg",
                 "-q:v", "5",
                 "-f", "image2",
