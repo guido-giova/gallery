@@ -1,12 +1,10 @@
 package com.ggiova.gallery.controller;
 
 import com.ggiova.gallery.dto.ItemUpdate;
-import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.service.ItemService;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
+import com.ggiova.gallery.service.VariantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,30 +17,19 @@ import java.util.Map;
 @RequestMapping("/api/files")
 public class ItemController {
     private final ItemService itemService;
+    private final VariantService variantService;
 
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
+    public ItemController(
+        ItemService itemService,
+        VariantService variantService
+    ) {
+        this.itemService    = itemService;
+        this.variantService = variantService;
     }
 
     @GetMapping
     public List<ItemListing> findAll() {
         return this.itemService.listAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Item> findById(@PathVariable long id) {
-        return itemService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{id}/content")
-    public ResponseEntity<Resource> getContent(@PathVariable long id) {
-        return this.itemService.getContent(id)
-                               .map(c -> ResponseEntity.ok()
-                                       .contentType(MediaType.parseMediaType(c.mime()))
-                                       .body(c.resource())
-                               ).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/upload")

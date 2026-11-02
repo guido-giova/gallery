@@ -25,11 +25,15 @@ public class MediaInspector {
             "video/quicktime"
     );
 
-    private final Tika tika = new Tika();
     private final VideoInspector videoInspector;
+    private final Tika tika;
 
-    public MediaInspector(VideoInspector videoInspector) {
+    public MediaInspector(
+        VideoInspector videoInspector,
+        Tika tika
+    ) {
         this.videoInspector = videoInspector;
+        this.tika           = tika;
     }
 
     public MediaResponse inspectMedia(Path path) {

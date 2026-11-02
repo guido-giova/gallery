@@ -10,8 +10,6 @@ public final class ItemMapper {
         return new Item(
                 resultSet.getLong("id"),
                 resultSet.getString("hash"),
-                resultSet.getString("storage_path"),
-                resultSet.getString("mime"),
                 resultSet.getLong("size_bytes"),
                 resultSet.getInt("width"),
                 resultSet.getInt("height"),

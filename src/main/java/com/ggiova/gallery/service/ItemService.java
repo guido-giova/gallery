@@ -2,6 +2,8 @@ package com.ggiova.gallery.service;
 
 import com.ggiova.gallery.components.file.FileStorage;
 import com.ggiova.gallery.components.file.FileStorageResponse;
+import com.ggiova.gallery.components.file.StoredVariant;
+import com.ggiova.gallery.data.Variant;
 import com.ggiova.gallery.dto.ItemUpdate;
 import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.ReviewResult;
@@ -9,6 +11,7 @@ import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.data.Item;
 import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
+import com.ggiova.gallery.repository.VariantRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,24 +28,27 @@ public class ItemService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ItemService.class);
 
     private final ItemRepository itemRepository;
+    private final VariantRepository variantRepository;
     private final FileStorage storage;
 
     public ItemService(
             ItemRepository itemRepository,
+            VariantRepository variantRepository,
             FileStorage storage
     ) {
-        this.itemRepository = itemRepository;
-        this.storage        = storage;
+        this.itemRepository    = itemRepository;
+        this.variantRepository = variantRepository;
+        this.storage           = storage;
     }
 
     public List<ItemListing> listAll() {
         return this.itemRepository.listAll();
     }
 
-    public Optional<Content> getContent(long id) {
-        return itemRepository.findById(id)
-                             .flatMap(item -> storage.load(item.storagePath())
-                             .map(res -> new Content(res, item.mime())));
+    public Optional<Content> getContent(long itemId, String variantKind) {
+        return this.variantRepository.findByParentIdAndVariant(itemId, variantKind)
+                                     .flatMap(variant -> storage.load(variant.storagePath())
+                                     .map(res -> new Content(res, variant.mime())));
     }
 
     public UploadResult create(MultipartFile mf) {
@@ -64,29 +70,29 @@ public class ItemService {
     }
 
     private UploadResult register(FileStorageResponse.StoredFile stored) {
+        LOGGER.info("Registering file and its variants: {}.", stored.hash());
+        Long id = null;
         try {
-            long id = this.itemRepository.insertNewFile(
-                    stored.hash(),
-                    stored.storagePath(),
-                    stored.mime(),
-                    stored.sizeBytes(),
-                    stored.width(),
-                    stored.height(),
-                    stored.durationMs()
-            );
+            id = this.itemRepository.insertNewFile(stored.hash(), stored.sizeBytes(), stored.width(), stored.height(), stored.durationMs());
+
+            for (StoredVariant sv : stored.variants()) {
+                this.variantRepository.insertNewVariant(id, sv.kind(), sv.storagePath(), sv.mime());
+            }
             return new UploadResult.Success(id);
         } catch (RuntimeException e) {
-            System.err.printf("Failed to register file %s.%n", stored.storagePath());
-            try {
-                this.storage.delete(stored.storagePath());
-            } catch (IOException ignored) {
+            LOGGER.error("Failed to register file {}.", stored.hash(), e);
+            if (id != null) {
+                try { this.itemRepository.deleteById(id); } catch (RuntimeException ignored) {}
+            }
+            for (StoredVariant sv : stored.variants()) {
+                try { this.storage.delete(sv.storagePath()); } catch (IOException ignored) {}
             }
             return new UploadResult.Failure("Could not store the file");
         }
     }
 
     public Optional<Item> findById(long id) {
-        return itemRepository.findById(id);
+        return this.itemRepository.findById(id);
     }
 
     public ReviewResult review(long id) {
@@ -142,13 +148,24 @@ public class ItemService {
         if (found.isEmpty()) { return false; }
         Item item = found.get();
 
-        this.itemRepository.deleteById(id);
+        List<Variant> variants = this.variantRepository.findByParentId(id);
 
-        try {
-            storage.delete(item.storagePath());
-        } catch (IOException | InvalidPathException e) {
-            LOGGER.error("Item {} deleted but file {} could not be removed. Reason {}.", id, item.storagePath(), e.getLocalizedMessage(), e);
+        for (Variant variant : variants) {
+            try {
+                this.storage.delete(variant.storagePath());
+            } catch (IOException e) {
+                LOGGER.error(
+                        "Variant with ID {}, with item ID {}, and kind {} deleted successfully, but file ({}) could not be removed. Reason: {}.",
+                        variant.id(),
+                        variant.itemId(),
+                        variant.kind(),
+                        variant.storagePath(),
+                        e.getLocalizedMessage(),
+                        e
+                );
+            }
         }
+        this.itemRepository.deleteById(id);
         return true;
     }
 }

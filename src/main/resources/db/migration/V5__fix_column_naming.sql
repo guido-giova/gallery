@@ -1,0 +1,1 @@
+ALTER TABLE variants RENAME COLUMN media_id TO item_id;

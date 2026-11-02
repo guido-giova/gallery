@@ -13,13 +13,13 @@ import java.util.Optional;
 public class ItemRepository {
     private static final String QUERY_INSERT = """
         INSERT INTO items (
-            hash, storage_path, mime, size_bytes, width, height, duration_ms
+            hash, size_bytes, width, height, duration_ms
         ) VALUES (
-            :hash, :storagePath, :mime, :sizeBytes, :width, :height, :durationMs
+            :hash, :sizeBytes, :width, :height, :durationMs
         )
         RETURNING id;
     """;
-    private static final String QUERY_LIST_ALL = "SELECT id, mime, is_favorite, was_reviewed FROM items ORDER BY id";
+    private static final String QUERY_LIST_ALL = "SELECT id, is_favorite, was_reviewed FROM items ORDER BY id";
     private static final String QUERY_FIND_BY_ID = "SELECT * FROM items WHERE id = :id";
     private static final String QUERY_UPDATE_IS_FAVORITE = "UPDATE items SET is_favorite = :isFavorite WHERE id = :id;";
     private static final String QUERY_UPDATE_TITLE = "UPDATE items SET title = :title WHERE id = :id;";
@@ -39,11 +39,9 @@ public class ItemRepository {
                               .list();
     }
 
-    public long insertNewFile(String hash, String storagePath, String mime, long size, int width, int height, Long durationMs) {
+    public long insertNewFile(String hash, long size, int width, int height, Long durationMs) {
         return this.jdbcClient.sql(QUERY_INSERT)
                               .param("hash", hash)
-                              .param("storagePath", storagePath)
-                              .param("mime", mime)
                               .param("sizeBytes", size)
                               .param("width", width)
                               .param("height", height)
