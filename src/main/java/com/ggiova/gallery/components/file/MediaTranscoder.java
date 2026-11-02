@@ -13,8 +13,8 @@ public class MediaTranscoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaTranscoder.class);
     private static final int TIMEOUT_MINUTES_IMAGE = 1;
     private static final int TIMEOUT_MINUTES_VIDEO = 15;
-    private static final int VIDEO_SIZE = 360;
-    private static final int MAX_IMAGE_SIZE = 500;
+    private static final int VIDEO_SIZE = 240;
+    private static final int MAX_IMAGE_SIZE = 400;
 
     public boolean createVideoThumbnail(Path source, Path target) {
         return this.run(
