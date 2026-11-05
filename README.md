@@ -33,32 +33,46 @@ This is a table of the environment variables that the application uses.
 
 |    Name     | Description                                  | Default |
 |:-----------:|----------------------------------------------|:-------:|
-|    PORT     | Determines the port of the applicaiton       |  8080   |
+|    PORT     | Determines the port of the application       |  8080   |
 | DB_USERNAME | The user that can interact with the database |         |
 | DB_PASSWORD | The password of the user                     |         |
 
-## Item API
+## API
+
+### Item
 
 The item API is available under `/api/items`:
 
-| Method | Path              | Description                |
-|:------:|-------------------|----------------------------|
-|  GET   | `/api/items`      | List items                 |
-|  GET   | `/api/items/{id}` | Get one item               |
-|  POST  | `/api/items`      | Create an item             |
-|  PUT   | `/api/items/{id}` | Replace an item's metadata |
-| DELETE | `/api/items/{id}` | Delete an item             |
+| Method | Path              | Description                | Implemented |
+|:------:|-------------------|----------------------------|:-----------:|
+|  GET   | `/api/items`      | List items                 |      N      |
+|  GET   | `/api/items/{id}` | Get one item               |      N      |
+|  POST  | `/api/items`      | Create an item             |      N      |
+|  PUT   | `/api/items/{id}` | Replace an item's metadata |      N      |
+| DELETE | `/api/items/{id}` | Delete an item             |      N      |
 
 Create and update requests use the JSON fields from the `Item` record. The ID in an
 update URL is authoritative; the ID in its JSON body is ignored.
 
-## Tests
+## Instructions
 
-The repository integration tests start a temporary PostgreSQL database in Docker and run the Flyway migrations against
-it. Start Docker Desktop, then run:
+### Run the Application
 
-```powershell
-.\mvnw.cmd test
+Make sure you have Java 25 installed.
+
+Run the Spring Boot application using the Maven wrapper:
+
+```bash
+./mvnw spring-boot:run -e
 ```
 
-The tests use their own temporary database and do not modify your configured gallery database.
+On Windows, use:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+The application will be available at [http://localhost:8080](http://localhost:8080) by default.
+You can change the port by setting the `PORT` environment variable.
+
+Make sure `DB_USERNAME` and `DB_PASSWORD` are configured if your database requires credentials.
