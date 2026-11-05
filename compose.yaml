@@ -26,11 +26,12 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       STORAGE_PATH: /app/uploads
+      LOG_PATH: /app/logs
     ports:
       - "8081:8081"
     volumes:
       - ${STORAGE_PATH:?Set STORAGE_PATH in .env}:/app/uploads
-      - ./logs:/app/logs
+      - ${LOG_PATH:?Set LOG_PATH in .env}:/app/logs
 
   web:
     build: ../gallery-ui
