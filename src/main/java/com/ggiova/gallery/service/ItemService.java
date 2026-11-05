@@ -23,6 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Service layer of the system. Manages the items' listing ({@link ItemService#listAll()}), content retrieval
+ * ({@link ItemService#getContent(long)}), creation ({@link ItemService#create(MultipartFile)}), finding
+ * ({@link ItemService#findById(long)}), review ({@link ItemService#review(long)}), update
+ * ({@link ItemService#update(long, ItemUpdate)}), and delete ({@link ItemService#deleteById(long)}).
+ */
 @Service
 public class ItemService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ItemService.class);
@@ -31,6 +37,13 @@ public class ItemService {
     private final VariantRepository variantRepository;
     private final FileStorage storage;
 
+    /**
+     * ItemService's constructor.
+     *
+     * @param itemRepository    Repository that stores the items.
+     * @param variantRepository Repository for the variants of the items.
+     * @param storage           Component that handles file storage.
+     */
     public ItemService(
             ItemRepository itemRepository,
             VariantRepository variantRepository,
@@ -41,6 +54,11 @@ public class ItemService {
         this.storage           = storage;
     }
 
+    /**
+     * Lists all items.
+     *
+     * @return all items.
+     */
     public List<ItemListing> listAll() {
         return this.itemRepository.listAll();
     }
@@ -51,6 +69,12 @@ public class ItemService {
                                      .map(res -> new Content(res, variant.mime())));
     }
 
+    /**
+     * Creates a new item based on the given content.
+     *
+     * @param mf content for which a file will be created.
+     * @return An {@link UploadResult} that represents what happened.
+     */
     public UploadResult create(MultipartFile mf) {
         return this.storage.store(mf)
                            .mapTo(UploadResult.class)
@@ -92,10 +116,22 @@ public class ItemService {
         }
     }
 
+    /**
+     * Finds the item based on the given id.
+     *
+     * @param id That will be used to search.
+     * @return An {@link Optional} that contains the item if found, an empty optional otherwise.
+     */
     public Optional<Item> findById(long id) {
         return this.itemRepository.findById(id);
     }
 
+    /**
+     * Makes an item count as viewed.
+     *
+     * @param id of the item that will be viewed.
+     * @return A {@link ReviewResult} that informs if it's been reviewed or already has.
+     */
     public ReviewResult review(long id) {
         Optional<Item> item = this.findById(id);
         if (item.isEmpty()) {
@@ -106,6 +142,13 @@ public class ItemService {
                   new ReviewResult.AlreadyReviewed();
     }
 
+    /**
+     * Updates the data
+     *
+     * @param id         of the item that will be updated.
+     * @param itemUpdate New data.
+     * @return A {@link Map} with information about the changes.
+     */
     public Optional<Map<String, String>> update(long id, ItemUpdate itemUpdate) {
         Map<String, String> response = new java.util.HashMap<>();
 
@@ -144,6 +187,12 @@ public class ItemService {
         return Optional.of(response);
     }
 
+    /**
+     * Deletes the item of a given id.
+     *
+     * @param id of the item that will be deleted.
+     * @return {@code true} if it was deleted, {@code false} otherwise.
+     */
     public boolean deleteById(long id) {
         Optional<Item> found = this.itemRepository.findById(id);
         if (found.isEmpty()) { return false; }
