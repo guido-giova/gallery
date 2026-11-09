@@ -22,12 +22,12 @@ public class ItemRepository {
         )
         RETURNING id;
     """;
-    private static final String QUERY_LIST_ALL = "SELECT id, is_favorite, was_reviewed, created_at, taken_at FROM items ORDER BY COALESCE(taken_at, created_at), created_at;";
+    private static final String QUERY_LIST_ALL = "SELECT id, favorite, reviewed, created_at, taken_at FROM items ORDER BY COALESCE(taken_at, created_at), created_at;";
     private static final String QUERY_FIND_BY_ID = "SELECT * FROM items WHERE id = :id";
-    private static final String QUERY_UPDATE_IS_FAVORITE = "UPDATE items SET is_favorite = :isFavorite WHERE id = :id;";
+    private static final String QUERY_UPDATE_IS_FAVORITE = "UPDATE items SET favorite = :favorite WHERE id = :id;";
     private static final String QUERY_UPDATE_TITLE = "UPDATE items SET title = :title WHERE id = :id;";
     private static final String QUERY_UPDATE_DESCRIPTION = "UPDATE items SET description = :description WHERE id = :id;";
-    private static final String QUERY_UPDATE_REVIEWED = "UPDATE items SET was_reviewed = TRUE WHERE id = :id;";
+    private static final String QUERY_UPDATE_REVIEWED = "UPDATE items SET reviewed = TRUE WHERE id = :id;";
     private static final String QUERY_DELETE_BY_ID = "DELETE FROM items WHERE id = :id";
 
     private final JdbcClient jdbcClient;
@@ -96,7 +96,7 @@ public class ItemRepository {
      */
     public boolean updateFavorite(long id, boolean isFavorite) {
         return this.jdbcClient.sql(QUERY_UPDATE_IS_FAVORITE)
-                              .param("isFavorite", isFavorite)
+                              .param("favorite", isFavorite)
                               .param("id", id)
                               .update() > 0;
     }

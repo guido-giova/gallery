@@ -16,8 +16,8 @@ public final class ItemMapper {
                 resultSet.getObject("duration_ms", Long.class),
                 resultSet.getString("title"),
                 resultSet.getString("description"),
-                resultSet.getBoolean("is_favorite"),
-                resultSet.getBoolean("was_reviewed"),
+                resultSet.getBoolean("favorite"),
+                resultSet.getBoolean("reviewed"),
                 resultSet.getTimestamp("created_at").toInstant(),
                 resultSet.getTimestamp("taken_at").toLocalDateTime()
         );

@@ -1,0 +1,1 @@
+ALTER TABLE items RENAME COLUMN was_reviewed TO reviewed;
