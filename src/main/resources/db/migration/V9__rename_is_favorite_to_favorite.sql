@@ -1,0 +1,1 @@
+ALTER TABLE items RENAME COLUMN is_favorite TO favorite;
