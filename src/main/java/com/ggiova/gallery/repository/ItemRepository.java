@@ -22,7 +22,7 @@ public class ItemRepository {
         )
         RETURNING id;
     """;
-    private static final String QUERY_LIST_ALL = "SELECT id, is_favorite, was_reviewed FROM items ORDER BY id";
+    private static final String QUERY_LIST_ALL = "SELECT id, is_favorite, was_reviewed, created_at, taken_at FROM items ORDER BY id";
     private static final String QUERY_FIND_BY_ID = "SELECT * FROM items WHERE id = :id";
     private static final String QUERY_UPDATE_IS_FAVORITE = "UPDATE items SET is_favorite = :isFavorite WHERE id = :id;";
     private static final String QUERY_UPDATE_TITLE = "UPDATE items SET title = :title WHERE id = :id;";
