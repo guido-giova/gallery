@@ -33,10 +33,8 @@ public class ItemController {
     }
 
     @PostMapping("/upload")
-    public List<UploadResult> create(@RequestParam MultipartFile[] files) {
-        return Arrays.stream(files)
-                     .map(this.itemService::create)
-                     .toList();
+    public UploadResult create(@RequestParam MultipartFile file) {
+        return this.itemService.create(file);
     }
 
     @PatchMapping("/{id}")
