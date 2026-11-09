@@ -24,10 +24,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Service layer of the system. Manages the items' listing ({@link ItemService#listAll()}), content retrieval
- * ({@link ItemService#getContent(long)}), creation ({@link ItemService#create(MultipartFile)}), finding
- * ({@link ItemService#findById(long)}), review ({@link ItemService#review(long)}), update
- * ({@link ItemService#update(long, ItemUpdate)}), and delete ({@link ItemService#deleteById(long)}).
+ * Service layer of the system. Manages the items' listing ({@link ItemService#listAll()}), creation
+ * ({@link ItemService#create(MultipartFile)}), finding ({@link ItemService#findById(long)}), review
+ * ({@link ItemService#review(long)}), update ({@link ItemService#update(long, ItemUpdate)}), and delete
+ * ({@link ItemService#deleteById(long)}).
  */
 @Service
 public class ItemService {
