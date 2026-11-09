@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
  * @param description of the file.
  * @param isFavorite  determines if the file is favorite.
  * @param wasReviewed determines if the file has been reviewed. For when files are automatically added instead of uploaded by the user.
+ * @param createdAt   datetime it was uploaded at
+ * @param takenAt     datetime it was taken at
  */
 public record Item(
         long id,                    // non-nullable
