@@ -31,6 +31,10 @@ public final class Strings {
         return randomUUID() + termination;
     }
 
+    public static String randomUUIDWithTerminationAndBeginning(String beginning, String termination) {
+        return beginning + Strings.randomUUID() + termination;
+    }
+
     /**
      * Generates a UUID String with the extension of the {@see MultipartFile}.
      *

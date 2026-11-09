@@ -2,6 +2,7 @@ package com.ggiova.gallery.components.file;
 
 import com.ggiova.gallery.config.AppProperties;
 import com.ggiova.gallery.data.VariantKind;
+import com.ggiova.gallery.functional.Transcode;
 import com.ggiova.gallery.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,8 @@ import java.util.Optional;
 
 @Component
 public class FileStorage {
-    private static final String THUMB_DIR = ".variants";
+    private static final int MAX_TRIES = 3;
+    private static final String VARIANTS_DIRECTORY = ".variants";
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStorage.class);
 
     private final Path directory;
@@ -113,25 +115,56 @@ public class FileStorage {
 
     private FileStorageResponse.StoredFile storeMedia(MultipartFile mf, MediaResponse.MediaInfo info, String storedName, Path target, String hash) throws IOException {
         boolean isVideo = info.mime().startsWith("video/");
-        String thumbRel = getThumbnailPath(isVideo);
-        Path thumb = this.directory.resolve(thumbRel);
-        Files.createDirectories(thumb.getParent());
-
-        boolean thumbOk = isVideo
-                        ? this.transcoder.createVideoThumbnail(target, thumb)
-                        : this.transcoder.createImageThumbnail(target, thumb);
 
         List<StoredVariant> variants = new java.util.ArrayList<>();
         variants.add(new StoredVariant(VariantKind.ORIGINAL, storedName, info.mime()));
-        if (thumbOk) {
-            variants.add(new StoredVariant(VariantKind.THUMBNAIL, thumbRel, isVideo ? "video/mp4" : "image/jpeg"));
-        } else {
-            this.deleteQuietly(thumb);
+
+        Optional<StoredVariant> storedThumbnail = this.storeThumbnail(info, target, isVideo);
+        Optional<StoredVariant> storedLowRes = this.storeLowRes(info, target, isVideo);
+        if (storedThumbnail.isEmpty() || storedLowRes.isEmpty()) {
+            throw new RuntimeException("Could not create variants");
         }
+        variants.add(storedThumbnail.get());
+        variants.add(storedLowRes.get());
+
         return new FileStorageResponse.StoredFile(hash, mf.getSize(), info.width(), info.height(), info.durationMs(), variants);
     }
 
-    private static String getThumbnailPath(boolean video) {
-        return THUMB_DIR + "/" + Strings.randomUUID() + (video ? ".mp4" : ".jpg");
+    private Optional<StoredVariant> storeThumbnail(MediaResponse.MediaInfo info, Path target, boolean isVideo) throws IOException {
+        return this.storeVariant(
+                target,
+                VariantKind.THUMBNAIL,
+                isVideo ? ".mp4" : ".jpeg",
+                isVideo ? this.transcoder::createVideoThumbnail : this.transcoder::createImageThumbnail
+        );
+    }
+
+    private Optional<StoredVariant> storeLowRes(MediaResponse.MediaInfo info, Path target, boolean isVideo) throws IOException {
+        return this.storeVariant(
+                target,
+                VariantKind.LOW_RES,
+                ".jpeg",
+                isVideo ? this.transcoder::createVideoLowRes : this.transcoder::createImageLowRes
+        );
+    }
+
+    private Optional<StoredVariant> storeVariant(
+            Path target,
+            VariantKind kind,
+            String extension,
+            Transcode transcode
+    ) throws IOException {
+        for (int tries = 0; tries < MAX_TRIES; tries++) {
+            String fileRel = Strings.randomUUIDWithTerminationAndBeginning(VARIANTS_DIRECTORY + "/", extension);
+            Path file = this.directory.resolve(fileRel);
+            Files.createDirectories(file.getParent());
+
+            Optional<String> fileType = transcode.apply(target, file);
+            if (fileType.isPresent()) {
+                return Optional.of(new StoredVariant(kind, fileRel, fileType.get()));
+            }
+            this.deleteQuietly(file);
+        }
+        return Optional.empty();
     }
 }
