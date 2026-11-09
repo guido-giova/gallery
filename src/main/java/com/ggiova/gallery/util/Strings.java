@@ -5,8 +5,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public final class Strings {
-
-    private Strings() {}
+    private Strings() {
+        throw new UnsupportedOperationException("Don't instantiate!");
+    }
 
     public static String randomUUID() {
         return UUID.randomUUID().toString();
