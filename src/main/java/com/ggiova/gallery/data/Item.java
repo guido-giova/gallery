@@ -32,4 +32,31 @@ public record Item(
         boolean wasReviewed,        // non-nullable     default: false
         Instant createdAt,          // non-nullable     default: today
         LocalDateTime takenAt       // nullable
-) {}
+) {
+    public Item {
+        if (hash == null) {
+            throw new NullPointerException("hash cannot be null");
+        }
+        if (sizeBytes <= 0) {
+            throw new IllegalArgumentException("sizeBytes must be > 0");
+        }
+        if (width <= 0) {
+            throw new IllegalArgumentException("width must be > 0");
+        }
+        if (height <= 0) {
+            throw new IllegalArgumentException("height must be > 0");
+        }
+        if (durationMs != null && durationMs <= 0) {
+            throw new IllegalArgumentException("durationMs must be > 0");
+        }
+        if (title == null) {
+            title = "";
+        }
+        if (description == null) {
+            description = "";
+        }
+        if (createdAt == null) {
+            throw new NullPointerException("createdAt cannot be null");
+        }
+    }
+}
