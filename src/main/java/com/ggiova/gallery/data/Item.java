@@ -1,5 +1,8 @@
 package com.ggiova.gallery.data;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 /**
  * Represents one item, as in, an image or video.
  *
@@ -13,6 +16,8 @@ package com.ggiova.gallery.data;
  * @param description of the file.
  * @param isFavorite  determines if the file is favorite.
  * @param wasReviewed determines if the file has been reviewed. For when files are automatically added instead of uploaded by the user.
+ * @param createdAt   datetime it was uploaded at
+ * @param takenAt     datetime it was taken at
  */
 public record Item(
         long id,                    // non-nullable
@@ -24,5 +29,34 @@ public record Item(
         String title,               // non-nullable     default: ""
         String description,         // non-nullable     default: ""
         boolean isFavorite,         // non-nullable     default: false
-        boolean wasReviewed         // non-nullable     default: false
-) {}
+        boolean wasReviewed,        // non-nullable     default: false
+        Instant createdAt,          // non-nullable     default: today
+        LocalDateTime takenAt       // nullable
+) {
+    public Item {
+        if (hash == null) {
+            throw new NullPointerException("hash cannot be null");
+        }
+        if (sizeBytes <= 0) {
+            throw new IllegalArgumentException("sizeBytes must be > 0");
+        }
+        if (width <= 0) {
+            throw new IllegalArgumentException("width must be > 0");
+        }
+        if (height <= 0) {
+            throw new IllegalArgumentException("height must be > 0");
+        }
+        if (durationMs != null && durationMs <= 0) {
+            throw new IllegalArgumentException("durationMs must be > 0");
+        }
+        if (title == null) {
+            title = "";
+        }
+        if (description == null) {
+            description = "";
+        }
+        if (createdAt == null) {
+            throw new NullPointerException("createdAt cannot be null");
+        }
+    }
+}
