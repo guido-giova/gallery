@@ -31,4 +31,4 @@ videos.
 |    Name    | Version |
 |:----------:|:-------:|
 |    Java    |   21    |
-| SpringBoot |  4.1.1  |
+| SpringBoot |  4.1.2  |
