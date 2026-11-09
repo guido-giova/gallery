@@ -2,7 +2,11 @@ package com.ggiova.gallery.util;
 
 import java.util.Optional;
 
-public class Integers {
+public final class Integers {
+    private Integers() {
+        throw new UnsupportedOperationException("Don't instantiate!");
+    }
+
     public static Optional<Integer> parse(String s) {
         try {
             return s == null
