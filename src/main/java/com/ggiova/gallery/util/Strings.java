@@ -16,6 +16,10 @@ public final class Strings {
         return randomUUID() + termination;
     }
 
+    public static String randomUUIDWithTerminationAndBeginning(String beginning, String termination) {
+        return beginning + Strings.randomUUID() + termination;
+    }
+
     public static String randomUUID(MultipartFile mf) {
         String originalFilename = mf.getOriginalFilename();
 
