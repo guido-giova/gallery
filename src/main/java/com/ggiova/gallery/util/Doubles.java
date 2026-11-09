@@ -2,7 +2,11 @@ package com.ggiova.gallery.util;
 
 import java.util.Optional;
 
-public class Doubles {
+public final class Doubles {
+    private Doubles() {
+        throw new UnsupportedOperationException("Don't instantiate!");
+    }
+
     public static Optional<Double> parse(String s) {
         try {
             return s == null
