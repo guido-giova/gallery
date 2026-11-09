@@ -1,5 +1,8 @@
 package com.ggiova.gallery.data;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 /**
  * Represents one item, as in, an image or video.
  *
@@ -24,5 +27,7 @@ public record Item(
         String title,               // non-nullable     default: ""
         String description,         // non-nullable     default: ""
         boolean isFavorite,         // non-nullable     default: false
-        boolean wasReviewed         // non-nullable     default: false
+        boolean wasReviewed,        // non-nullable     default: false
+        Instant createdAt,          // non-nullable     default: today
+        LocalDateTime takenAt       // nullable
 ) {}
