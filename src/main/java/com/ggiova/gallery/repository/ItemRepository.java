@@ -7,6 +7,7 @@ import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.VariantListing;
 import com.ggiova.gallery.mapper.InstantMapper;
 import com.ggiova.gallery.mapper.ItemMapper;
+import com.ggiova.gallery.mapper.LocalDateTimeMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -192,7 +193,7 @@ public class ItemRepository {
                         rs.getBoolean("favorite"),
                         rs.getBoolean("reviewed"),
                         InstantMapper.toInstant(rs.getTimestamp("created_at")),
-                        toLocalDateTime(rs.getTimestamp("taken_at")),
+                        LocalDateTimeMapper.toLocalDateTime(rs.getTimestamp("taken_at")),
                         new java.util.ArrayList<>());
                 byId.put(id, itemAndVariants);
             }
@@ -206,9 +207,5 @@ public class ItemRepository {
             }
         }
         return List.copyOf(byId.values());
-    }
-
-    private static LocalDateTime toLocalDateTime(Timestamp ts) {
-        return ts == null ? null : ts.toLocalDateTime();
     }
 }
