@@ -6,7 +6,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+/**
+ * Mapper class for Items
+ */
 public final class ItemMapper {
+    /**
+     * Maps a resultSet from a query into an Item object.
+     *
+     * @param resultSet The ResultSet to map
+     * @param rowNumber The number of the current row
+     * @return An Item object
+     * @throws SQLException If any error is encountered while getting the column values.
+     * @see org.springframework.jdbc.core.RowMapper
+     */
     public static Item mapItem(ResultSet resultSet, int rowNumber) throws SQLException {
         return new Item(
                 resultSet.getLong("id"),
