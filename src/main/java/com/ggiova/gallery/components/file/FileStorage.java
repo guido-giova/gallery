@@ -26,7 +26,8 @@ import java.util.Optional;
 @Component
 public class FileStorage {
     private static final int MAX_TRIES = 3;
-    private static final String VARIANTS_DIRECTORY = ".variants";
+    private static final String THUMBNAIL_DIRECTORY = ".thumbnails";
+    private static final String LOW_RES_DIRECTORY = ".lowres";
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStorage.class);
 
     private final Path directory;
@@ -134,6 +135,7 @@ public class FileStorage {
         return this.storeVariant(
                 target,
                 VariantKind.THUMBNAIL,
+                THUMBNAIL_DIRECTORY,
                 isVideo ? ".mp4" : ".jpeg",
                 isVideo ? this.transcoder::createVideoThumbnail : this.transcoder::createImageThumbnail
         );
@@ -143,6 +145,7 @@ public class FileStorage {
         return this.storeVariant(
                 target,
                 VariantKind.LOW_RES,
+                LOW_RES_DIRECTORY,
                 ".jpeg",
                 isVideo ? this.transcoder::createVideoLowRes : this.transcoder::createImageLowRes
         );
@@ -151,11 +154,12 @@ public class FileStorage {
     private Optional<StoredVariant> storeVariant(
             Path target,
             VariantKind kind,
+            String directory,
             String extension,
             Transcode transcode
     ) throws IOException {
         for (int tries = 0; tries < MAX_TRIES; tries++) {
-            String fileRel = Strings.randomUUIDWithTerminationAndBeginning(VARIANTS_DIRECTORY + "/", extension);
+            String fileRel = Strings.randomUUIDWithTerminationAndBeginning(directory + "/", extension);
             Path file = this.directory.resolve(fileRel);
             Files.createDirectories(file.getParent());
 
