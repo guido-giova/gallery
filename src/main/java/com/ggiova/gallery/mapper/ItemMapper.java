@@ -4,6 +4,7 @@ import com.ggiova.gallery.data.Item;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 public final class ItemMapper {
     public static Item mapItem(ResultSet resultSet, int rowNumber) throws SQLException {
@@ -19,7 +20,12 @@ public final class ItemMapper {
                 resultSet.getBoolean("favorite"),
                 resultSet.getBoolean("reviewed"),
                 resultSet.getTimestamp("created_at").toInstant(),
-                resultSet.getTimestamp("taken_at").toLocalDateTime()
+                ItemMapper.getTakenAt(resultSet)
         );
+    }
+
+    private static LocalDateTime getTakenAt(ResultSet resultSet) throws SQLException {
+        java.sql.Timestamp takenAt = resultSet.getTimestamp("taken_at");
+        return (takenAt == null) ? null : takenAt.toLocalDateTime();
     }
 }
