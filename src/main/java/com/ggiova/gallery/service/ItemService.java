@@ -4,12 +4,8 @@ import com.ggiova.gallery.components.file.FileStorage;
 import com.ggiova.gallery.components.file.FileStorageResponse;
 import com.ggiova.gallery.components.file.StoredVariant;
 import com.ggiova.gallery.data.Variant;
-import com.ggiova.gallery.dto.ItemUpdate;
-import com.ggiova.gallery.dto.ItemListing;
-import com.ggiova.gallery.dto.ReviewResult;
-import com.ggiova.gallery.dto.UploadResult;
+import com.ggiova.gallery.dto.*;
 import com.ggiova.gallery.data.Item;
-import com.ggiova.gallery.dto.internal.Content;
 import com.ggiova.gallery.repository.ItemRepository;
 import com.ggiova.gallery.repository.VariantRepository;
 import org.slf4j.Logger;
@@ -18,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.InvalidPathException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,14 +54,8 @@ public class ItemService {
      *
      * @return all items.
      */
-    public List<ItemListing> listAll() {
-        return this.itemRepository.listAll();
-    }
-
-    public Optional<Content> getContent(long itemId, String variantKind) {
-        return this.variantRepository.findByParentIdAndVariant(itemId, variantKind)
-                                     .flatMap(variant -> storage.load(variant.storagePath())
-                                     .map(res -> new Content(res, variant.mime())));
+    public List<ItemAndVariantsListing> listAll() {
+        return this.itemRepository.listAllAndVariants();
     }
 
     /**

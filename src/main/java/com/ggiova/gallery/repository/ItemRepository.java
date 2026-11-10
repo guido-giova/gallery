@@ -1,11 +1,19 @@
 package com.ggiova.gallery.repository;
 
 import com.ggiova.gallery.data.Item;
+import com.ggiova.gallery.data.VariantKind;
+import com.ggiova.gallery.dto.ItemAndVariantsListing;
 import com.ggiova.gallery.dto.ItemListing;
+import com.ggiova.gallery.dto.VariantListing;
 import com.ggiova.gallery.mapper.ItemMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +37,20 @@ public class ItemRepository {
     private static final String QUERY_UPDATE_DESCRIPTION = "UPDATE items SET description = :description WHERE id = :id;";
     private static final String QUERY_UPDATE_REVIEWED = "UPDATE items SET reviewed = TRUE WHERE id = :id;";
     private static final String QUERY_DELETE_BY_ID = "DELETE FROM items WHERE id = :id";
+    private static final String QUERY_LIST_ALL_ITEMS_AND_VARIANTS = """
+            SELECT
+                i.id,
+                i.favorite,
+                i.reviewed,
+                i.created_at,
+                i.taken_at,
+                v.id AS variant_id,
+                v.kind AS variant_kind,
+                v.mime AS variant_mime
+            FROM items i
+            JOIN variants v ON v.item_id = i.id
+            ORDER BY i.id, v.id;
+            """;
 
     private final JdbcClient jdbcClient;
 
@@ -151,5 +173,45 @@ public class ItemRepository {
         return this.jdbcClient.sql(QUERY_DELETE_BY_ID)
                               .param("id", id)
                               .update() > 0;
+    }
+
+    public List<ItemAndVariantsListing> listAllAndVariants() {
+        return jdbcClient.sql(QUERY_LIST_ALL_ITEMS_AND_VARIANTS)
+                         .query(ItemRepository::getItemAndVariantsListings);
+    }
+
+    private static List<ItemAndVariantsListing> getItemAndVariantsListings(ResultSet rs) throws SQLException {
+        java.util.Map<Long, ItemAndVariantsListing> byId = new java.util.LinkedHashMap<>();
+        while (rs.next()) {
+            long id = rs.getLong("id");
+            ItemAndVariantsListing itemAndVariants = byId.get(id);
+            if (itemAndVariants == null) {
+                itemAndVariants = new ItemAndVariantsListing(
+                        id,
+                        rs.getBoolean("favorite"),
+                        rs.getBoolean("reviewed"),
+                        toInstant(rs.getTimestamp("created_at")),
+                        toLocalDateTime(rs.getTimestamp("taken_at")),
+                        new java.util.ArrayList<>());
+                byId.put(id, itemAndVariants);
+            }
+
+            long variantId = rs.getLong("variant_id");
+            if (!rs.wasNull()) {
+                itemAndVariants.variants().add(new VariantListing(
+                        variantId,
+                        VariantKind.valueOf(rs.getString("variant_kind")),
+                        rs.getString("variant_mime")));
+            }
+        }
+        return List.copyOf(byId.values());
+    }
+
+    private static Instant toInstant(Timestamp ts) {
+        return ts == null ? null : ts.toInstant();
+    }
+
+    private static LocalDateTime toLocalDateTime(Timestamp ts) {
+        return ts == null ? null : ts.toLocalDateTime();
     }
 }

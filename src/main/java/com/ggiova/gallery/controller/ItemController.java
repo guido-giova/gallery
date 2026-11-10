@@ -1,7 +1,7 @@
 package com.ggiova.gallery.controller;
 
+import com.ggiova.gallery.dto.ItemAndVariantsListing;
 import com.ggiova.gallery.dto.ItemUpdate;
-import com.ggiova.gallery.dto.ItemListing;
 import com.ggiova.gallery.dto.UploadResult;
 import com.ggiova.gallery.service.ItemService;
 import com.ggiova.gallery.service.VariantService;
@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemListing> findAll() {
+    public List<ItemAndVariantsListing> findAll() {
         return this.itemService.listAll();
     }
 
